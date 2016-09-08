@@ -7,20 +7,7 @@
 #include <string.h>
 #include "sort.h"
 
-struct listNode
-{
-	struct listNode* next;
-	struct __rec_dataptr_t* info;
-};
-struct list
-{
-	struct listNode* first;
-	struct listNode* current;
-	unsigned int length;
-};
-
-int listAddNode (struct list* inList, struct listNode* appendNode);
-int decompileList (struct list* inList);
+int decompileArray (struct __rec_dataptr_t* inArray, unsigned int size);
 
 void usage(char *prog)
 {
@@ -78,8 +65,8 @@ int main(int argc, char *argv[])
   }
   printf("Number of records: %d\n", recordsLeft);
   rec_nodata_t r;
-//  unsigned int data[MAX_DATA_INTS];
-  struct list* unsortedList = (struct list*)malloc(sizeof(struct list));
+  unsigned int count = 0;
+  struct __rec_dataptr_t* unsortedArray = (struct __rec_dataptr_t*)malloc(recordsLeft * sizeof(struct __rec_dataptr_t));
   while (recordsLeft)
   {
     // Read the fixed-sized portion of record: key and size of data
@@ -91,70 +78,41 @@ int main(int argc, char *argv[])
     }
     assert(r.data_ints <= MAX_DATA_INTS);
 
-    struct listNode* currRecord = (struct listNode*)malloc(sizeof(struct listNode));
-    currRecord->next = NULL;
-    currRecord->info = (struct __rec_dataptr_t*)malloc(sizeof(struct __rec_dataptr_t));
-    currRecord->info->key = r.key;
-    currRecord->info->data_ints = r.data_ints;
-    currRecord->info->data_ptr = (unsigned int*)malloc(r.data_ints*sizeof(unsigned int));
+    unsortedArray[count].key = r.key;
+    unsortedArray[count].data_ints = r.data_ints;
+    unsortedArray[count].data_ptr = (unsigned int*)malloc(r.data_ints*sizeof(unsigned int));
 
     // Read the variable portion of the record
-    rc = read(fd, currRecord->info->data_ptr, r.data_ints * sizeof(unsigned int));
+    rc = read(fd, unsortedArray[count].data_ptr, r.data_ints * sizeof(unsigned int));
     if (rc !=  r.data_ints * sizeof(unsigned int))
     {
       perror("read");
       exit(1);
     }
 
-    rc = listAddNode(unsortedList, currRecord);
-    if (rc != 0)
-    {
-      perror("List Addition");
-      exit(1);
-    }
-
     recordsLeft--;
+    count++;
   }
 
-  //decompileList(unsortedList);
+//  decompileArray(unsortedArray, count);
 
   (void)close(fd);
   (void)close(fdOut);
   return 0;
 }
 
-int listAddNode (struct list* inList, struct listNode* appendNode)
+int decompileArray (struct __rec_dataptr_t* inArray, unsigned int size)
 {
-	if ((NULL == inList) || (NULL == appendNode)) return 1;
-	if (NULL == inList->first)
+	if (NULL == inArray) return 1;
+	unsigned int i = 0;
+	while (i < size)
 	{
-		inList->first = appendNode;
-		inList->current = appendNode;
-		inList->length = 1;
-	}
-	else
-	{
-		inList->current->next = appendNode;
-		inList->current = appendNode;
-		inList->length++;
-	}
-	return 0;
-}
-
-int decompileList (struct list* inList)
-{
-	if ((NULL == inList) || (NULL == inList->first)) return 1;
-	inList->current = inList->first;
-	unsigned int count = 0;
-	while (NULL != inList->current)
-	{
-		struct listNode* currRecord = inList->current;
-	    printf("key %d: %u data_ints: %u rec: ", count++, currRecord->info->key, currRecord->info->data_ints);
+	    printf("key %d: %u data_ints: %u rec: ", i, inArray[i].key, inArray[i].data_ints);
 	    int j;
-	    for (j = 0; j < currRecord->info->data_ints; j++)
-	      printf("%u ", *(currRecord->info->data_ptr + j));
+	    for (j = 0; j < inArray[i].data_ints; j++)
+	      printf("%u ", *(inArray[i].data_ptr + j));
 	    printf("\n");
-		inList->current = inList->current->next;
+	    i++;
 	}
 	return 0;
 }
