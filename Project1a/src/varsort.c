@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "sort.h"
 
 int decompileArray (struct __rec_dataptr_t** inArray, unsigned int size);
@@ -54,6 +55,10 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+  struct stat inFileStat;
+  fstat(fd, &inFileStat);
+  long long int size = inFileStat.st_size;
+
   // output the number of keys as a header for this file
   int recordsLeft;
   int rc;
@@ -68,6 +73,8 @@ int main(int argc, char *argv[])
   rec_nodata_t r;
   unsigned int count = 0;
   struct __rec_dataptr_t** unsortedArray = (struct __rec_dataptr_t**)malloc(recordsLeft * sizeof(struct __rec_dataptr_t*));
+  void *memoryPool = malloc(size + recordsLeft*sizeof(unsigned int*));
+//  void *memoryPoolToBeFreed = memoryPool;
   while (recordsLeft)
   {
     // Read the fixed-sized portion of record: key and size of data
@@ -79,10 +86,12 @@ int main(int argc, char *argv[])
     }
     assert(r.data_ints <= MAX_DATA_INTS);
 
-    unsortedArray[count] = (struct __rec_dataptr_t*)malloc(sizeof(struct __rec_dataptr_t));
+    unsortedArray[count] = (struct __rec_dataptr_t*)memoryPool;
     unsortedArray[count]->key = r.key;
     unsortedArray[count]->data_ints = r.data_ints;
-    unsortedArray[count]->data_ptr = (unsigned int*)malloc(r.data_ints*sizeof(unsigned int));
+    memoryPool += (2*sizeof(unsigned int)) + (sizeof(unsigned int*));
+    unsortedArray[count]->data_ptr = (unsigned int*)memoryPool;
+    memoryPool += (r.data_ints*sizeof(unsigned int));
 
     // Read the variable portion of the record
     rc = read(fd, unsortedArray[count]->data_ptr, r.data_ints * sizeof(unsigned int));
@@ -128,7 +137,6 @@ int main(int argc, char *argv[])
 	    exit(1);
 	  }
   }
-
 
   (void)close(fd);
   (void)close(fdOut);

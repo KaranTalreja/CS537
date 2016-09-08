@@ -27,3 +27,8 @@ SORTING   : 32000
 WRITE     : 44027
 --------------------
 Total     : 293790
+
+ChangeList:
+      1.Used a memory pool, instead of mallocing every time for the data. Set the pointers in it to save some malloc calls.
+	Gain : 293790 - 255805 = 37985 (12.9%)
+	Final CREATE_OM (est) : 43675 - 37985 = 5691 (-86.9%)
