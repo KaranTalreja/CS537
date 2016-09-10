@@ -8,7 +8,13 @@
 #include <sys/stat.h>
 #include "sort.h"
 
-int decompileArray (struct __rec_dataptr_t** inArray, unsigned int size);
+
+typedef struct __rec_nodata_wrapper_t {
+  rec_nodata_t *rec_nodata;
+  unsigned int *data_ptr;
+} rec_nodata_wrapper_t;
+
+int decompileArray (struct __rec_nodata_wrapper_t** inArray, unsigned int size);
 int compareRecDataPtr (__const void* first, __const void* second);
 
 void usage(char *prog)
@@ -57,7 +63,7 @@ int main(int argc, char *argv[])
 
   struct stat inFileStat;
   fstat(fd, &inFileStat);
-  long long int size = inFileStat.st_size;
+  size_t sizeOfFile = inFileStat.st_size;
 
   // output the number of keys as a header for this file
   int recordsLeft;
@@ -69,45 +75,37 @@ int main(int argc, char *argv[])
     perror("read");
     exit(1);
   }
+
+  sizeOfFile = sizeOfFile - sizeof(unsigned int);
   printf("Number of records: %d\n", recordsLeft);
-  rec_nodata_t r;
   unsigned int count = 0;
-  struct __rec_dataptr_t** unsortedArray = (struct __rec_dataptr_t**)malloc(recordsLeft * sizeof(struct __rec_dataptr_t*));
-  void *memoryPool = malloc(size + recordsLeft*sizeof(unsigned int*));
-//  void *memoryPoolToBeFreed = memoryPool;
+  size_t sizeOfOMContainer = recordsLeft*sizeof(struct __rec_nodata_wrapper_t*);
+  size_t sizeOfOMElements = recordsLeft*sizeof(struct __rec_nodata_wrapper_t);
+  void *memoryPool = malloc(sizeOfFile + sizeOfOMContainer + sizeOfOMElements);
+  void *memoryPoolToFree = memoryPool;
+  struct __rec_nodata_wrapper_t** unsortedArray = (struct __rec_nodata_wrapper_t**)(memoryPool + sizeOfFile);
+  void *memoryPoolOfOMElements = memoryPool + sizeOfFile + sizeOfOMContainer;
+  rc = read(fd, memoryPool, sizeOfFile);
+  if (rc != sizeOfFile)
+  {
+    perror("read");
+    exit(1);
+  }
   while (recordsLeft)
   {
-    // Read the fixed-sized portion of record: key and size of data
-    rc = read(fd, &r, sizeof(rec_nodata_t));
-    if (rc != sizeof(rec_nodata_t))
-    {
-      perror("read");
-      exit(1);
-    }
-    assert(r.data_ints <= MAX_DATA_INTS);
-
-    unsortedArray[count] = (struct __rec_dataptr_t*)memoryPool;
-    unsortedArray[count]->key = r.key;
-    unsortedArray[count]->data_ints = r.data_ints;
-    memoryPool += (2*sizeof(unsigned int)) + (sizeof(unsigned int*));
+    unsortedArray[count] = (struct __rec_nodata_wrapper_t*)memoryPoolOfOMElements;
+    memoryPoolOfOMElements += sizeof(struct __rec_nodata_wrapper_t);
+    unsortedArray[count]->rec_nodata = (rec_nodata_t*)memoryPool;
+    memoryPool += sizeof(rec_nodata_t);
     unsortedArray[count]->data_ptr = (unsigned int*)memoryPool;
-    memoryPool += (r.data_ints*sizeof(unsigned int));
-
-    // Read the variable portion of the record
-    rc = read(fd, unsortedArray[count]->data_ptr, r.data_ints * sizeof(unsigned int));
-    if (rc !=  r.data_ints * sizeof(unsigned int))
-    {
-      perror("read");
-      exit(1);
-    }
-
+    memoryPool += (unsortedArray[count]->rec_nodata->data_ints*sizeof(unsigned int));
     recordsLeft--;
     count++;
   }
 
 //  decompileArray(unsortedArray, count);
 
-  qsort(&unsortedArray[0], count, sizeof(struct __rec_dataptr_t*), compareRecDataPtr);
+  qsort(&unsortedArray[0], count, sizeof(struct __rec_nodata_wrapper_t*), compareRecDataPtr);
 
 //  decompileArray(unsortedArray, count);
   // output the number of keys as a header for this file
@@ -121,13 +119,13 @@ int main(int argc, char *argv[])
   struct __rec_data_t dumpRec;
   while (i < count)
   {
-	  dumpRec.key = unsortedArray[i]->key;
-	  dumpRec.data_ints = unsortedArray[i]->data_ints;
+	  dumpRec.key = unsortedArray[i]->rec_nodata->key;
+	  dumpRec.data_ints = unsortedArray[i]->rec_nodata->data_ints;
 	  unsigned int j;
-	  for (j = 0; j < unsortedArray[i]->data_ints; j++)
+	  for (j = 0; j < dumpRec.data_ints ; j++)
 		  dumpRec.data[j] = *(unsortedArray[i]->data_ptr + j);
 	  i++;
-	  int data_size = 2*sizeof(unsigned int) + dumpRec.data_ints*sizeof(unsigned int);
+	  int data_size = (2 + dumpRec.data_ints)*sizeof(unsigned int);
 
 	  rc = write(fdOut, &dumpRec, data_size);
 
@@ -138,20 +136,23 @@ int main(int argc, char *argv[])
 	  }
   }
 
+  free(inFile);
+  free(outFile);
+  free(memoryPoolToFree);
   (void)close(fd);
   (void)close(fdOut);
   return 0;
 }
 
-int decompileArray (struct __rec_dataptr_t** inArray, unsigned int size)
+int decompileArray (struct __rec_nodata_wrapper_t** inArray, unsigned int size)
 {
 	if (NULL == inArray) return 1;
 	unsigned int i = 0;
 	while (i < size)
 	{
-	    printf("key %d: %u data_ints: %u rec: ", i, inArray[i]->key, inArray[i]->data_ints);
+	    printf("key %d: %u data_ints: %u rec: ", i, inArray[i]->rec_nodata->key, inArray[i]->rec_nodata->data_ints);
 	    int j;
-	    for (j = 0; j < inArray[i]->data_ints; j++)
+	    for (j = 0; j < inArray[i]->rec_nodata->data_ints; j++)
 	      printf("%u ", *(inArray[i]->data_ptr + j));
 	    printf("\n");
 	    i++;
@@ -161,9 +162,9 @@ int decompileArray (struct __rec_dataptr_t** inArray, unsigned int size)
 
 int compareRecDataPtr (__const void* first, __const void* seccond)
 {
-	struct __rec_dataptr_t* firstRecord = *(struct __rec_dataptr_t**)first;
-	struct __rec_dataptr_t* secondRecord = *(struct __rec_dataptr_t**)seccond;
-	if (firstRecord->key < secondRecord->key) return -1;
-	else if (firstRecord->key > secondRecord->key) return 1;
+	unsigned int firstRecordKey = (*(struct __rec_nodata_wrapper_t**)first)->rec_nodata->key;
+	unsigned int secondRecordKey = (*(struct __rec_nodata_wrapper_t**)seccond)->rec_nodata->key;
+	if (firstRecordKey < secondRecordKey) return -1;
+	else if (firstRecordKey > secondRecordKey) return 1;
 	return 0;
 }

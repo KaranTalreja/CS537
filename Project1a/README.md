@@ -30,5 +30,5 @@ Total     : 293790
 
 ChangeList:
       1.Used a memory pool, instead of mallocing every time for the data. Set the pointers in it to save some malloc calls.
-	Gain : 293790 - 255805 = 37985 (12.9%)
-	Final CREATE_OM (est) : 43675 - 37985 = 5691 (-86.9%)
+        Insights: Do one malloc, one file read and dont't dereference twice like a->b->c in a loop. Save once then reuse. esp.For loop
+	Gain : 293790 - 254366 = 39424 (13.42%) 
