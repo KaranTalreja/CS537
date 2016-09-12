@@ -7,7 +7,23 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "sort.h"
+#include <sys/time.h>
+static struct timeval tm1;
 
+static inline void start()
+{
+  gettimeofday(&tm1, NULL);
+}
+
+static inline void stop()
+{
+  struct timeval tm2;
+  gettimeofday(&tm2, NULL);
+
+  unsigned long long t = 1000 * (tm2.tv_sec - tm1.tv_sec) + (tm2.tv_usec - tm1.tv_usec) / 1000;
+  printf("%llu ms\n", t);
+}
+#define BASE 256
 
 typedef struct __rec_nodata_wrapper_t {
   rec_nodata_t *rec_nodata;
@@ -16,6 +32,7 @@ typedef struct __rec_nodata_wrapper_t {
 
 int decompileArray (struct __rec_nodata_wrapper_t** inArray, unsigned int size);
 int compareRecDataPtr (__const void* first, __const void* second);
+int radixSort (struct __rec_nodata_wrapper_t** unsortedArray, unsigned int size);
 
 void usage(char *prog)
 {
@@ -34,17 +51,17 @@ int main(int argc, char *argv[])
   while (-1 != (c = getopt(argc, argv, "i:o:")))
   {
     switch (c) {
-    case 'i':
-      inFile = strdup(optarg);
-      break;
-    case 'o':
-      outFile = strdup(optarg);
-      break;
-    default:
-      usage(argv[0]);
+      case 'i':
+        inFile = strdup(optarg);
+        break;
+      case 'o':
+        outFile = strdup(optarg);
+        break;
+      default:
+        usage(argv[0]);
     }
   }
-
+//  start();
   // open input file
   int fd = open(inFile, O_RDONLY);
   if (0 > fd)
@@ -91,6 +108,7 @@ int main(int argc, char *argv[])
     perror("read");
     exit(1);
   }
+
   while (recordsLeft)
   {
     unsortedArray[count] = (struct __rec_nodata_wrapper_t*)memoryPoolOfOMElements;
@@ -103,11 +121,13 @@ int main(int argc, char *argv[])
     count++;
   }
 
-//  decompileArray(unsortedArray, count);
+  //  decompileArray(unsortedArray, count);
 
-  qsort(&unsortedArray[0], count, sizeof(struct __rec_nodata_wrapper_t*), compareRecDataPtr);
+  //  qsort(&unsortedArray[0], count, sizeof(struct __rec_nodata_wrapper_t*), compareRecDataPtr);
 
-//  decompileArray(unsortedArray, count);
+  radixSort(unsortedArray, count);
+
+  //  decompileArray(unsortedArray, count);
   // output the number of keys as a header for this file
   rc = write(fdOut, &count, sizeof(count));
   if (rc != sizeof(count))
@@ -115,30 +135,24 @@ int main(int argc, char *argv[])
     perror("write");
     exit(1);
   }
+
   unsigned int i = 0;
-  struct __rec_data_t dumpRec;
   while (i < count)
   {
-	  dumpRec.key = unsortedArray[i]->rec_nodata->key;
-	  dumpRec.data_ints = unsortedArray[i]->rec_nodata->data_ints;
-	  unsigned int j;
-	  for (j = 0; j < dumpRec.data_ints ; j++)
-		  dumpRec.data[j] = *(unsortedArray[i]->data_ptr + j);
-	  i++;
-	  int data_size = (2 + dumpRec.data_ints)*sizeof(unsigned int);
-
-	  rc = write(fdOut, &dumpRec, data_size);
-
-	  if (rc != data_size )
-	  {
-	    perror("write");
-	    exit(1);
-	  }
+    int data_size = (2+unsortedArray[i]->rec_nodata->data_ints)*sizeof(unsigned int);
+    rc = write(fdOut, unsortedArray[i]->rec_nodata, data_size);
+    i++;
+    if (rc != data_size )
+    {
+      perror("write");
+      exit(1);
+    }
   }
 
   free(inFile);
   free(outFile);
   free(memoryPoolToFree);
+//  stop();
   (void)close(fd);
   (void)close(fdOut);
   return 0;
@@ -146,25 +160,68 @@ int main(int argc, char *argv[])
 
 int decompileArray (struct __rec_nodata_wrapper_t** inArray, unsigned int size)
 {
-	if (NULL == inArray) return 1;
-	unsigned int i = 0;
-	while (i < size)
-	{
-	    printf("key %d: %u data_ints: %u rec: ", i, inArray[i]->rec_nodata->key, inArray[i]->rec_nodata->data_ints);
-	    int j;
-	    for (j = 0; j < inArray[i]->rec_nodata->data_ints; j++)
-	      printf("%u ", *(inArray[i]->data_ptr + j));
-	    printf("\n");
-	    i++;
-	}
-	return 0;
+  if (NULL == inArray) return 1;
+  unsigned int i = 0;
+  while (i < size)
+  {
+    printf("key %d: %u data_ints: %u rec: ", i, inArray[i]->rec_nodata->key, inArray[i]->rec_nodata->data_ints);
+    int j;
+    for (j = 0; j < inArray[i]->rec_nodata->data_ints; j++)
+      printf("%u ", *(inArray[i]->data_ptr + j));
+    printf("\n");
+    i++;
+  }
+  return 0;
 }
 
 int compareRecDataPtr (__const void* first, __const void* seccond)
 {
-	unsigned int firstRecordKey = (*(struct __rec_nodata_wrapper_t**)first)->rec_nodata->key;
-	unsigned int secondRecordKey = (*(struct __rec_nodata_wrapper_t**)seccond)->rec_nodata->key;
-	if (firstRecordKey < secondRecordKey) return -1;
-	else if (firstRecordKey > secondRecordKey) return 1;
-	return 0;
+  unsigned int firstRecordKey = (*(struct __rec_nodata_wrapper_t**)first)->rec_nodata->key;
+  unsigned int secondRecordKey = (*(struct __rec_nodata_wrapper_t**)seccond)->rec_nodata->key;
+  if (firstRecordKey < secondRecordKey) return -1;
+  else if (firstRecordKey > secondRecordKey) return 1;
+  return 0;
+}
+
+int radixSort (struct __rec_nodata_wrapper_t** unsortedArray, unsigned int size)
+{
+  if (NULL == unsortedArray) return 1;
+  int maxDigits = 0;
+  unsigned int exponent = 1;
+  unsigned int maxKey = unsortedArray[0]->rec_nodata->key;
+  unsigned int i = 0;
+  for (i = 1; i < size ; i++)
+  {
+    if (unsortedArray[i]->rec_nodata->key > maxKey)	maxKey = unsortedArray[i]->rec_nodata->key;
+  }
+  while (0 != maxKey)
+  {
+    maxDigits++;
+    maxKey /= BASE;
+  }
+  int j = 0;
+  struct __rec_nodata_wrapper_t** arraySortWorkspace = (struct __rec_nodata_wrapper_t**) malloc(size*sizeof(struct __rec_nodata_wrapper_t*));
+  for (j = 0; j < maxDigits; j++)
+  {
+    int counterBuckets[BASE] = {0};
+    for (i = 0 ; i < size; i++)
+    {
+      counterBuckets[(unsortedArray[i]->rec_nodata->key / exponent) % BASE]++;
+    }
+    for (i = 1 ; i < BASE; i++)
+    {
+      counterBuckets[i] = counterBuckets[i] + counterBuckets[i-1];
+    }
+    for (i = size ; i > 0; i--)
+    {
+      arraySortWorkspace[--counterBuckets[(unsortedArray[i-1]->rec_nodata->key / exponent) % BASE]] = unsortedArray[i-1];
+    }
+    for (i = 0 ; i < size; i++)
+    {
+      unsortedArray[i] = arraySortWorkspace[i];
+    }
+    exponent = exponent * BASE;
+  }
+  free(arraySortWorkspace);
+  return 0;
 }
