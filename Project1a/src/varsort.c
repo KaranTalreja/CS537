@@ -7,49 +7,31 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "sort.h"
-#include <sys/time.h>
-static struct timeval tm1;
 
-static inline void start()
-{
-  gettimeofday(&tm1, NULL);
-}
-
-static inline void stop()
-{
-  struct timeval tm2;
-  gettimeofday(&tm2, NULL);
-
-  unsigned long long t = 1000 * (tm2.tv_sec - tm1.tv_sec) + (tm2.tv_usec - tm1.tv_usec) / 1000;
-  printf("%llu ms\n", t);
-}
 #define BASE 256
 
-typedef struct __rec_nodata_wrapper_t {
+typedef struct __element {
   rec_nodata_t *rec_nodata;
   unsigned int *data_ptr;
-} rec_nodata_wrapper_t;
+} element;
 
-int decompileArray (struct __rec_nodata_wrapper_t** inArray, unsigned int size);
-int compareRecDataPtr (__const void* first, __const void* second);
-int radixSort (struct __rec_nodata_wrapper_t** unsortedArray, unsigned int size);
+int decompileArray(element** inArray, unsigned int size);
+int compareRecDataPtr(const void* first, const void* second);
+int radixSort(element** array, unsigned int size);
 
-void usage(char *prog)
-{
-  fprintf(stderr, "usage: %s <-i file>\n", prog);
+void usage() {
+  fprintf(stderr, "Usage: varsort -i inputfile -o outputfile\n");
   exit(1);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   // arguments
-  char *inFile = "/no/such/file";
-  char *outFile = "/no/such/file";
+  char *inFile = NULL;
+  char *outFile = NULL;
   int c;
-
+  if (argc < 5) usage();
   opterr = 0;
-  while (-1 != (c = getopt(argc, argv, "i:o:")))
-  {
+  while (-1 != (c = getopt(argc, argv, "i:o:"))) {
     switch (c) {
       case 'i':
         inFile = strdup(optarg);
@@ -58,23 +40,21 @@ int main(int argc, char *argv[])
         outFile = strdup(optarg);
         break;
       default:
-        usage(argv[0]);
+        usage();
     }
   }
-//  start();
+  if ((NULL == inFile) || (NULL == outFile)) usage();
   // open input file
   int fd = open(inFile, O_RDONLY);
-  if (0 > fd)
-  {
-    perror("open");
+  if (0 > fd) {
+    fprintf(stderr, "Error: Cannot open file %s\n", inFile);
     exit(1);
   }
 
   // open output file
   int fdOut = open(outFile, O_WRONLY|O_CREAT|O_TRUNC, S_IRWXU);
-  if (0 > fdOut)
-  {
-    perror("open");
+  if (0 > fdOut) {
+    fprintf(stderr, "Error: Cannot open file %s\n", outFile);
     exit(1);
   }
 
@@ -87,64 +67,54 @@ int main(int argc, char *argv[])
   int rc;
 
   rc = read(fd, &recordsLeft, sizeof(recordsLeft));
-  if (rc != sizeof(recordsLeft))
-  {
-    perror("read");
+  if (rc != sizeof(recordsLeft)) {
+    fprintf(stderr, "read error\n");
     exit(1);
   }
 
   sizeOfFile = sizeOfFile - sizeof(unsigned int);
-  printf("Number of records: %d\n", recordsLeft);
   unsigned int count = 0;
-  size_t sizeOfOMContainer = recordsLeft*sizeof(struct __rec_nodata_wrapper_t*);
-  size_t sizeOfOMElements = recordsLeft*sizeof(struct __rec_nodata_wrapper_t);
-  void *memoryPool = malloc(sizeOfFile + sizeOfOMContainer + sizeOfOMElements);
+  size_t sizeOfOMContainer = recordsLeft*sizeof(element*);
+  size_t sizeOfOMElements = recordsLeft*sizeof(element);
+  void *memoryPool = malloc(sizeOfFile+sizeOfOMContainer+sizeOfOMElements);
   void *memoryPoolToFree = memoryPool;
-  struct __rec_nodata_wrapper_t** unsortedArray = (struct __rec_nodata_wrapper_t**)(memoryPool + sizeOfFile);
+  element** array = (element**)(memoryPool+sizeOfFile);
   void *memoryPoolOfOMElements = memoryPool + sizeOfFile + sizeOfOMContainer;
   rc = read(fd, memoryPool, sizeOfFile);
-  if (rc != sizeOfFile)
-  {
-    perror("read");
+  if (rc != sizeOfFile) {
+    fprintf(stderr, "read error\n");
     exit(1);
   }
 
-  while (recordsLeft)
-  {
-    unsortedArray[count] = (struct __rec_nodata_wrapper_t*)memoryPoolOfOMElements;
-    memoryPoolOfOMElements += sizeof(struct __rec_nodata_wrapper_t);
-    unsortedArray[count]->rec_nodata = (rec_nodata_t*)memoryPool;
+  while (recordsLeft) {
+    array[count] = (element*)memoryPoolOfOMElements;
+    memoryPoolOfOMElements += sizeof(element);
+    array[count]->rec_nodata = (rec_nodata_t*)memoryPool;
     memoryPool += sizeof(rec_nodata_t);
-    unsortedArray[count]->data_ptr = (unsigned int*)memoryPool;
-    memoryPool += (unsortedArray[count]->rec_nodata->data_ints*sizeof(unsigned int));
+    array[count]->data_ptr = (unsigned int*)memoryPool;
+    memoryPool += array[count]->rec_nodata->data_ints*sizeof(unsigned int);
     recordsLeft--;
     count++;
   }
 
-  //  decompileArray(unsortedArray, count);
+  // qsort(array, count, sizeof(struct __element*), compareRecDataPtr);
 
-  //  qsort(&unsortedArray[0], count, sizeof(struct __rec_nodata_wrapper_t*), compareRecDataPtr);
+  radixSort(array, count);
 
-  radixSort(unsortedArray, count);
-
-  //  decompileArray(unsortedArray, count);
   // output the number of keys as a header for this file
   rc = write(fdOut, &count, sizeof(count));
-  if (rc != sizeof(count))
-  {
-    perror("write");
+  if (rc != sizeof(count)) {
+    fprintf(stderr, "write error\n");
     exit(1);
   }
 
   unsigned int i = 0;
-  while (i < count)
-  {
-    int data_size = (2+unsortedArray[i]->rec_nodata->data_ints)*sizeof(unsigned int);
-    rc = write(fdOut, unsortedArray[i]->rec_nodata, data_size);
+  while (i < count) {
+    int data_size = (2+array[i]->rec_nodata->data_ints)*sizeof(unsigned int);
+    rc = write(fdOut, array[i]->rec_nodata, data_size);
     i++;
-    if (rc != data_size )
-    {
-      perror("write");
+    if (rc != data_size) {
+      fprintf(stderr, "write error\n");
       exit(1);
     }
   }
@@ -152,76 +122,50 @@ int main(int argc, char *argv[])
   free(inFile);
   free(outFile);
   free(memoryPoolToFree);
-//  stop();
   (void)close(fd);
   (void)close(fdOut);
   return 0;
 }
 
-int decompileArray (struct __rec_nodata_wrapper_t** inArray, unsigned int size)
-{
-  if (NULL == inArray) return 1;
-  unsigned int i = 0;
-  while (i < size)
-  {
-    printf("key %d: %u data_ints: %u rec: ", i, inArray[i]->rec_nodata->key, inArray[i]->rec_nodata->data_ints);
-    int j;
-    for (j = 0; j < inArray[i]->rec_nodata->data_ints; j++)
-      printf("%u ", *(inArray[i]->data_ptr + j));
-    printf("\n");
-    i++;
-  }
-  return 0;
-}
-
-int compareRecDataPtr (__const void* first, __const void* seccond)
-{
-  unsigned int firstRecordKey = (*(struct __rec_nodata_wrapper_t**)first)->rec_nodata->key;
-  unsigned int secondRecordKey = (*(struct __rec_nodata_wrapper_t**)seccond)->rec_nodata->key;
+int compareRecDataPtr(const void* first, const void* seccond) {
+  unsigned int firstRecordKey = (*(element**)first)->rec_nodata->key;
+  unsigned int secondRecordKey = (*(element**)seccond)->rec_nodata->key;
   if (firstRecordKey < secondRecordKey) return -1;
   else if (firstRecordKey > secondRecordKey) return 1;
   return 0;
 }
 
-int radixSort (struct __rec_nodata_wrapper_t** unsortedArray, unsigned int size)
-{
-  if (NULL == unsortedArray) return 1;
+int radixSort(element** array, unsigned int size) {
+  if ((NULL == array) || (0 == size)) return 1;
   int maxDigits = 0;
-  unsigned int exponent = 1;
-  unsigned int maxKey = unsortedArray[0]->rec_nodata->key;
+  unsigned int exp = 1;
+  unsigned int maxKey = array[0]->rec_nodata->key;
   unsigned int i = 0;
-  for (i = 1; i < size ; i++)
-  {
-    if (unsortedArray[i]->rec_nodata->key > maxKey)	maxKey = unsortedArray[i]->rec_nodata->key;
+  for (i = 1; i < size ; i++) {
+    if (array[i]->rec_nodata->key > maxKey) maxKey = array[i]->rec_nodata->key;
   }
-  while (0 != maxKey)
-  {
+  while (0 != maxKey) {
     maxDigits++;
     maxKey /= BASE;
   }
   int j = 0;
-  struct __rec_nodata_wrapper_t** arraySortWorkspace = (struct __rec_nodata_wrapper_t**) malloc(size*sizeof(struct __rec_nodata_wrapper_t*));
-  for (j = 0; j < maxDigits; j++)
-  {
-    int counterBuckets[BASE] = {0};
-    for (i = 0 ; i < size; i++)
-    {
-      counterBuckets[(unsortedArray[i]->rec_nodata->key / exponent) % BASE]++;
+  element** arrayTmp = (element**) malloc(size*sizeof(element*));
+  for (j = 0; j < maxDigits; j++) {
+    int counters[BASE] = {0};
+    for (i = 0 ; i < size; i++) {
+      counters[(array[i]->rec_nodata->key / exp) % BASE]++;
     }
-    for (i = 1 ; i < BASE; i++)
-    {
-      counterBuckets[i] = counterBuckets[i] + counterBuckets[i-1];
+    for (i = 1 ; i < BASE; i++) {
+      counters[i] = counters[i] + counters[i-1];
     }
-    for (i = size ; i > 0; i--)
-    {
-      arraySortWorkspace[--counterBuckets[(unsortedArray[i-1]->rec_nodata->key / exponent) % BASE]] = unsortedArray[i-1];
+    for (i = size ; i > 0; i--) {
+      arrayTmp[--counters[(array[i-1]->rec_nodata->key/exp)%BASE]] = array[i-1];
     }
-    for (i = 0 ; i < size; i++)
-    {
-      unsortedArray[i] = arraySortWorkspace[i];
+    for (i = 0 ; i < size; i++) {
+      array[i] = arrayTmp[i];
     }
-    exponent = exponent * BASE;
+    exp = exp * BASE;
   }
-  free(arraySortWorkspace);
+  free(arrayTmp);
   return 0;
 }
