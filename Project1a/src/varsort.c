@@ -100,8 +100,13 @@ int main(int argc, char *argv[]) {
   // size of elements contained in the OM container.
   size_t sizeOfOMElements = recordsLeft*sizeof(element);
 
+  size_t totalSizeOfMemory = sizeOfFile+sizeOfOMContainer+sizeOfOMElements;
   // Variable to hold all the memory allocated for file read and data storage
-  void *memoryPool = malloc(sizeOfFile+sizeOfOMContainer+sizeOfOMElements);
+  void *memoryPool = malloc(totalSizeOfMemory);
+  if (totalSizeOfMemory != 0 && NULL == memoryPool) {
+    fprintf(stderr, "memory allocation error.\n");
+    exit(0);
+  }
 
   // Backup pointer to free memory in one call to free()
   void *memoryPoolToFree = memoryPool;
@@ -210,6 +215,10 @@ int radixSort(element** array, unsigned int size) {
   }
   int j = 0;
   element** arrayTmp = (element**) malloc(size*sizeof(element*));
+  if (size != 0 && NULL == arrayTmp) {
+    fprintf(stderr, "memory allocation error.\n");
+    exit(0);
+  }
   element** bfrArr = arrayTmp;
   element** primArr = array;
   for (j = 0; j < maxDigits; j++) {
