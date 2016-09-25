@@ -5,11 +5,40 @@
 #include<string.h>
 #include<sys/wait.h>
 
+typedef enum __jobType {
+  FOREGROUND_JOB,
+  BACKGROUND_JOB,
+  BUILTIN_JOB
+} jobType_e;
+
+typedef enum __mode {
+  BATCH_MODE,
+  INTERACTIVE_MODE
+} mode_e;
+
+// @brief Function to print out usage of this program in case of invalid args
+void usage() {
+  char* usageStr = "Usage: mysh [batchFile]\n";
+  write(STDERR_FILENO, usageStr, strlen(usageStr));
+  exit(1);
+}
+
 int
 main(int argc, char* argv[]) {
+  mode_e shellMode = INTERACTIVE_MODE;
+  jobType_e jobType;
+  if (argc > 2) usage();
+  FILE* input = (2 == argc) ? fopen(argv[1], "r") : stdin;
+  if (NULL == input) {
+    fprintf(stderr, "Error: Cannot open file %s\n", argv[1]);
+    exit(1);
+  }
   char command[512];
-  printf("mysh> ");
-  while (NULL != fgets(command, sizeof(command), stdin)) {
+  if (stdin != input) shellMode = BATCH_MODE;
+  else
+    shellMode = INTERACTIVE_MODE;
+  if (INTERACTIVE_MODE == shellMode)  write(STDOUT_FILENO, "mysh> ", 6);
+  while (NULL != fgets(command, sizeof(command), input)) {
     char* token = NULL;
     char* currCommand = command;
     char* newLine = strchr(currCommand, '\n');
@@ -21,24 +50,33 @@ main(int argc, char* argv[]) {
       currCommand = NULL;
       argvs[i++] = strdup(token);
     }
-    bool runInBackground = false;
     if (0 == strcmp(argvs[i-1], "&")) {
-      runInBackground = true;
+      jobType = BACKGROUND_JOB;
       argvs[i-1] = NULL;
     } else {
+      jobType = FOREGROUND_JOB;
       argvs[i] = NULL;
     }
     int pid = fork();
     if (0 == pid) {
+      if (BATCH_MODE == shellMode) {
+        int j = 0;
+        while (NULL != argvs[j]) {
+          write(STDOUT_FILENO, argvs[j], strlen(argvs[j]));
+          write(STDOUT_FILENO, " ", 1);
+          j++;
+        }
+        write(STDOUT_FILENO, "\n", 1);
+      }
       execvp(argvs[0], argvs);
-      perror("execvp");
+      write(STDERR_FILENO, "execvp", 6);
       exit(1);
     } else if (0 < pid) {
-      if (false == runInBackground) (void) wait(NULL);
+      if (FOREGROUND_JOB == jobType) (void) wait(NULL);
     } else {
-      perror("fork");
+      write(STDERR_FILENO, "fork", 4);
     }
-    printf("mysh> ");
+    if (INTERACTIVE_MODE == shellMode) write(STDOUT_FILENO, "mysh> ", 6);
   }
   return 0;
 }
