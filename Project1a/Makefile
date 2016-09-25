@@ -1,4 +1,3 @@
-PROJ_WDIR=../../
 CURR_DIR=$(PWD)
 INCDIRS=-I gen_case/include/
 SRC=$(CURR_DIR)/src
@@ -21,7 +20,8 @@ all:$(EXEC)
 
 $(EXEC): $(OBJS)
 	@echo "$(notdir $^) --> $(notdir $@)"
-	@$(GCC) $^ -o $@ $(FLAGS) $(INCDIRS) 
+	@$(GCC) $^ -o $@ $(FLAGS) $(INCDIRS)
+	@$(MAKE) lint
 
 $(OBJDIR)/%.o: $(SRC)/%.c
 	@echo "$(notdir $^) --> $(notdir $@)"
@@ -34,9 +34,11 @@ $(OBJDIR)/%.d: $(SRC)/%.c
          sed 's,\($*\)\.o[ :]*,$(OBJDIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
          rm -f $@.$$$$
 
-test:
-	@echo "Testing"
-	@$(PROJ_WDIR)/Test/test.sh $(EXEC) TestCaseList
+lint:
+	@echo "Testing linter"
+	@cp $(CURR_DIR)/../lint/CPPLINT.cfg $(SRC)/
+	@$(CURR_DIR)/../lint/cpplint.py --extensions c,h $(SOURCES)
+	@rm $(SRC)/CPPLINT.cfg
 
 clean:
 	@rm -rf $(EXEC) $(OBJDIR)/*.d* $(OBJDIR)/*.d $(OBJDIR)/*.o 
