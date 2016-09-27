@@ -5,6 +5,8 @@
 #include<string.h>
 #include<sys/wait.h>
 #include<sys/types.h>
+#include<errno.h>
+#include<sys/time.h>
 
 typedef enum __jobType {
   FOREGROUND_JOB,
@@ -69,7 +71,7 @@ listAppendNode(list_t* list, process_t* process) {
 }
 
 void
-decompileList(list_t* inList) {
+outputRunningJobs(list_t* inList) {
   if ((NULL == inList) || (NULL == inList->first)) return;
   listnode_t *current = inList->first;
   while (NULL != current) {
@@ -85,6 +87,18 @@ decompileList(list_t* inList) {
     current = current->next;
   }
   return;
+}
+
+int
+getJob(list_t* inList, unsigned int jid) {
+  if ((NULL == inList) || (NULL == inList->first)) return 0;
+  listnode_t *current = inList->first;
+  while (NULL != current) {
+    listnode_t* currRecord = current;
+    if (currRecord->info->jid == jid) return currRecord->info->pid;
+    current = current->next;
+  }
+  return -1;
 }
 
 int
@@ -152,7 +166,9 @@ main(int argc, char* argv[]) {
       } else if (0 == strcmp("j", argvs[0])) {
         jobType = BUILTIN_JOB;
         builtinType = J_CMD;
-      } else if (0 == strcmp("myw", argvs[0])) {
+      }
+    } else if (2 == i) {
+      if (0 == strcmp("myw", argvs[0])) {
         jobType = BUILTIN_JOB;
         builtinType = MYW_CMD;
       }
@@ -162,8 +178,7 @@ main(int argc, char* argv[]) {
       int pid = fork();
       if (0 == pid) {
         if (BATCH_MODE == shellMode) {
-          write(STDOUT_FILENO, currCommand, strlen(currCommand));
-          write(STDOUT_FILENO, "\n", 1);
+          fprintf(stdout, "%s\n", currCommand);
         }
         execvp(argvs[0], argvs);
         fprintf(stderr, "%s: Command not found\n", argvs[0]);
@@ -188,16 +203,40 @@ main(int argc, char* argv[]) {
       }
     } else {
       if (BATCH_MODE == shellMode) {
-        write(STDOUT_FILENO, currCommand, strlen(currCommand));
-        write(STDOUT_FILENO, "\n", 1);
+        fprintf(stdout, "%s\n", currCommand);
         free(currCommand);
         currCommand = NULL;
         sprintfBuffer = NULL;
       }
-      if (EXIT_CMD == builtinType) break;
-      else if (J_CMD == builtinType) decompileList(processList);
+      if (EXIT_CMD == builtinType) {
+        break;
+      } else if (J_CMD == builtinType) {
+        outputRunningJobs(processList);
+      } else if (MYW_CMD == builtinType) {
+        int requiredJid = atoi(argvs[1]);
+        int rc = getJob(processList, requiredJid);
+        if (-1 == rc) {
+          fprintf(stdout, "Invalid jid %d\n", requiredJid);
+        } else if (0 < rc) {
+          int status;
+          int requiredPid = waitpid(rc, &status, WNOHANG);
+          if (0 < requiredPid) {
+          } else if (0 == requiredPid) {
+            struct timeval start;
+            gettimeofday(&start, NULL);
+            (void) waitpid(rc, &status, 0);
+            struct timeval end;
+            gettimeofday(&end, NULL);
+            size_t microSecs = (end.tv_sec-start.tv_sec)*1000000
+            + end.tv_usec-start.tv_usec;
+            fprintf(stdout, "%ld : Job %d terminated\n",
+            microSecs, requiredJid);
+          } else if (ECHILD == errno) {
+            fprintf(stdout, "0 : Job %d terminated\n", requiredJid);
+          }
+        }
+      }
     }
-
     if (INTERACTIVE_MODE == shellMode) write(STDOUT_FILENO, "mysh> ", 6);
   }
   return 0;
