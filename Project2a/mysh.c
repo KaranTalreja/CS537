@@ -136,7 +136,10 @@ main(int argc, char* argv[]) {
     char* context;
     char* argvs[512];
     int i = 0;
-
+    if (BATCH_MODE == shellMode) {
+      fprintf(stdout, "%s\n", currCommand);
+      fflush(stdout);
+    }
     while (NULL != (token = strtok_r(currCommand, " ", &context))) {
       currCommand = NULL;
       argvs[i++] = token;
@@ -184,10 +187,7 @@ main(int argc, char* argv[]) {
         builtinType = MYW_CMD;
       }
     }
-    if (BATCH_MODE == shellMode) {
-      fprintf(stdout, "%s\n", currCommand);
-      fflush(stdout);
-    }
+
     if (BUILTIN_JOB != jobType) {
       int pid = fork();
       if (0 == pid) {
