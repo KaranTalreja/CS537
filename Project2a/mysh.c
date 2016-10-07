@@ -131,8 +131,8 @@ main(int argc, char* argv[]) {
   while (NULL != fgets(command, sizeof(command), input)) {
     char* token = NULL;
     currCommand = command;
-    char* newLine = strchr(currCommand, '\n');
-    if (NULL != newLine) *newLine = '\0';
+    char* delChar = strchr(currCommand, '\n');
+    if (NULL != delChar) *delChar = '\0';
     char* context;
     char* argvs[512];
     int i = 0;
@@ -140,6 +140,12 @@ main(int argc, char* argv[]) {
       fprintf(stdout, "%s\n", currCommand);
       fflush(stdout);
     }
+    while (NULL != (delChar = strchr(currCommand, '\t'))) {
+      *delChar = ' ';
+      currCommand = delChar + 1;
+    }
+    currCommand = command;
+
     while (NULL != (token = strtok_r(currCommand, " ", &context))) {
       currCommand = NULL;
       argvs[i++] = token;
@@ -159,6 +165,10 @@ main(int argc, char* argv[]) {
     } else {
       jobType = FOREGROUND_JOB;
       argvs[i] = NULL;
+    }
+    if (0 == i) {
+      if (INTERACTIVE_MODE == shellMode) write(STDOUT_FILENO, "mysh> ", 6);
+      continue;  // Empty command
     }
 
     currCommand = (char*)malloc(sizeof(char)*512);
