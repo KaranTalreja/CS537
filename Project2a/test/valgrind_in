@@ -1,0 +1,5 @@
+ls
+echo 5
+sleep 3&
+j
+myw 3

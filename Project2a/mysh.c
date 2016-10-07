@@ -107,6 +107,8 @@ main(int argc, char* argv[]) {
   jobType_e jobType;
   builtin_e builtinType;
   list_t* processList = (list_t*)malloc(sizeof(list_t));
+  processList->first = NULL;
+  processList->current = NULL;
   char* currCommand = NULL, *sprintfBuffer = NULL;
   size_t jobCounter = 0;
 
@@ -137,11 +139,14 @@ main(int argc, char* argv[]) {
       currCommand = NULL;
       argvs[i++] = token;
     }
-
+    if (0 == i) continue;  // Empty command
     if (0 == strcmp(argvs[i-1], "&")) {
       jobType = BACKGROUND_JOB;
       argvs[i-1] = NULL;
       i--;
+    } else if (argvs[i-1][strlen(argvs[i-1])-1] == '&') {
+      jobType = BACKGROUND_JOB;
+      argvs[i-1][strlen(argvs[i-1])-1] = '\0';
     } else {
       jobType = FOREGROUND_JOB;
       argvs[i] = NULL;
@@ -173,13 +178,13 @@ main(int argc, char* argv[]) {
         builtinType = MYW_CMD;
       }
     }
-
+    if (BATCH_MODE == shellMode) {
+      fprintf(stdout, "%s\n", currCommand);
+      fflush(stdout);
+    }
     if (BUILTIN_JOB != jobType) {
       int pid = fork();
       if (0 == pid) {
-        if (BATCH_MODE == shellMode) {
-          fprintf(stdout, "%s\n", currCommand);
-        }
         execvp(argvs[0], argvs);
         fprintf(stderr, "%s: Command not found\n", argvs[0]);
         exit(1);
@@ -202,12 +207,6 @@ main(int argc, char* argv[]) {
         write(STDERR_FILENO, "fork", 4);
       }
     } else {
-      if (BATCH_MODE == shellMode) {
-        fprintf(stdout, "%s\n", currCommand);
-        free(currCommand);
-        currCommand = NULL;
-        sprintfBuffer = NULL;
-      }
       if (EXIT_CMD == builtinType) {
         break;
       } else if (J_CMD == builtinType) {
@@ -217,6 +216,7 @@ main(int argc, char* argv[]) {
         int rc = getJob(processList, requiredJid);
         if (-1 == rc) {
           fprintf(stdout, "Invalid jid %d\n", requiredJid);
+          fflush(stdout);
         } else if (0 < rc) {
           int status;
           int requiredPid = waitpid(rc, &status, WNOHANG);
@@ -231,13 +231,29 @@ main(int argc, char* argv[]) {
             + end.tv_usec-start.tv_usec;
             fprintf(stdout, "%ld : Job %d terminated\n",
             microSecs, requiredJid);
+            fflush(stdout);
           } else if (ECHILD == errno) {
             fprintf(stdout, "0 : Job %d terminated\n", requiredJid);
+            fflush(stdout);
           }
         }
       }
+      free(currCommand);
+      currCommand = NULL;
+      sprintfBuffer = NULL;
     }
     if (INTERACTIVE_MODE == shellMode) write(STDOUT_FILENO, "mysh> ", 6);
   }
+  if ((NULL == processList) || (NULL == processList->first)) return 0;
+  listnode_t *current = processList->first;
+  while (NULL != current) {
+    listnode_t* next = current->next;
+    free(current->info->command);
+    free(current->info);
+    free(current);
+    current = next;
+  }
+  if (shellMode == BATCH_MODE) fclose(input);
+  free(processList);
   return 0;
 }
