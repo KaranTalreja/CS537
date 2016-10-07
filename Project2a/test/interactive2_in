@@ -1,0 +1,13 @@
+apt-get moo
+echo four times five is twelve, and four times six is thirteen, and four times seven is-- >1.out
+seq -s , 18 3 30
+sleep 2&
+expr 4 x 7
+
+
+
+
+j
+myw 1000
+exit
+echo goodbye

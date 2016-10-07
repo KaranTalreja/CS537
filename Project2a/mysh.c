@@ -79,7 +79,9 @@ outputRunningJobs(list_t* inList) {
     if (STATUS_RUNNING == currRecord->info->status) {
       int status = 0;
       if (0 == waitpid(currRecord->info->pid, &status, WNOHANG)) {
-        printf("%d : %s\n", currRecord->info->jid, currRecord->info->command);
+        fprintf(stdout, "%d : %s\n", currRecord->info->jid, \
+        currRecord->info->command);
+        fflush(stdout);
       } else {
         currRecord->info->status = STATUS_TERMINATED;
       }
@@ -139,7 +141,10 @@ main(int argc, char* argv[]) {
       currCommand = NULL;
       argvs[i++] = token;
     }
-    if (0 == i) continue;  // Empty command
+    if (0 == i) {
+      if (INTERACTIVE_MODE == shellMode) write(STDOUT_FILENO, "mysh> ", 6);
+      continue;  // Empty command
+    }
     if (0 == strcmp(argvs[i-1], "&")) {
       jobType = BACKGROUND_JOB;
       argvs[i-1] = NULL;
@@ -147,6 +152,7 @@ main(int argc, char* argv[]) {
     } else if (argvs[i-1][strlen(argvs[i-1])-1] == '&') {
       jobType = BACKGROUND_JOB;
       argvs[i-1][strlen(argvs[i-1])-1] = '\0';
+      argvs[i] = NULL;
     } else {
       jobType = FOREGROUND_JOB;
       argvs[i] = NULL;
@@ -187,6 +193,7 @@ main(int argc, char* argv[]) {
       if (0 == pid) {
         execvp(argvs[0], argvs);
         fprintf(stderr, "%s: Command not found\n", argvs[0]);
+        fflush(stderr);
         exit(1);
       } else if (0 < pid) {
         process_t* currProcess = (process_t*)malloc(sizeof(process_t));
@@ -215,8 +222,8 @@ main(int argc, char* argv[]) {
         int requiredJid = atoi(argvs[1]);
         int rc = getJob(processList, requiredJid);
         if (-1 == rc) {
-          fprintf(stdout, "Invalid jid %d\n", requiredJid);
-          fflush(stdout);
+          fprintf(stderr, "Invalid jid %d\n", requiredJid);
+          fflush(stderr);
         } else if (0 < rc) {
           int status;
           int requiredPid = waitpid(rc, &status, WNOHANG);
