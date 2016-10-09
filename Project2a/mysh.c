@@ -121,7 +121,7 @@ main(int argc, char* argv[]) {
     exit(1);
   }
 
-  char command[512];
+  char command[514];  // newline + NULL
 
   if (stdin != input) shellMode = BATCH_MODE;
   else
@@ -132,7 +132,20 @@ main(int argc, char* argv[]) {
     char* token = NULL;
     currCommand = command;
     char* delChar = strchr(currCommand, '\n');
-    if (NULL != delChar) *delChar = '\0';
+    if (NULL != delChar) {
+      *delChar = '\0';
+    } else {
+      // Really long command seen. Leaving 512 characters for command only,
+      // new line does not fit in buffer. So continuing
+      fprintf(stderr, "Error: Command too long\n");
+      fflush(stderr);
+      if (BATCH_MODE == shellMode) {
+        fprintf(stdout, "%s\n", currCommand);
+        fflush(stdout);
+      }
+      while ('\n' != fgetc(input)) {}
+      continue;
+    }
     char* context;
     char* argvs[512];
     int i = 0;
@@ -171,7 +184,7 @@ main(int argc, char* argv[]) {
       continue;  // Empty command
     }
 
-    currCommand = (char*)malloc(sizeof(char)*512);
+    currCommand = (char*)malloc(sizeof(char)*514);
     sprintfBuffer = currCommand;
     int j = 0;
     sprintfBuffer+=snprintf(sprintfBuffer, strlen(argvs[j])+1, "%s", argvs[j]);
@@ -238,6 +251,8 @@ main(int argc, char* argv[]) {
           int status;
           int requiredPid = waitpid(rc, &status, WNOHANG);
           if (0 < requiredPid) {
+            fprintf(stdout, "0 : Job %d terminated\n", requiredJid);
+            fflush(stdout);
           } else if (0 == requiredPid) {
             struct timeval start;
             gettimeofday(&start, NULL);
