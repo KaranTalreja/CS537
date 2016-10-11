@@ -65,7 +65,7 @@ main(int argc, char *argv[])
   }
 
   // Wait for child processes to finish..
-  for (j = 0; j < 6; j++) {
+  for (j = 0; j < 7; j++) {
     wait();
   }
 

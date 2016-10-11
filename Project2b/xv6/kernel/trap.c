@@ -107,9 +107,10 @@ trap(struct trapframe *tf)
   // Force process to give up CPU on clock tick.
   // If interrupts were on while locks held, would need to check nlock.
   if(proc && proc->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER) {
-//    cprintf("Yielding from [pid:%d] [name:%s]\n", proc->pid, proc->name);
+    //cprintf("Yielding from [pid:%d] [name:%s]\n", proc->pid, proc->name);
 //    cprintf("[PID:%d],Tick[%d]:[%d]\n", proc->pid, proc->priority, proc->ticks[proc->priority]);
     proc->ticks[proc->priority] = proc->ticks[proc->priority] + 1;  // Rule 4
+    proc->accumulatedTicks[proc->priority] = proc->accumulatedTicks[proc->priority] + 1;  // Rule 4
 //    cprintf("[PID:%d],Tick[%d]:[%d]\n", proc->pid, proc->priority, proc->ticks[proc->priority]);
     starvTicks++;
     acquire(&ptable.lock);
@@ -122,7 +123,7 @@ trap(struct trapframe *tf)
           int currPrio = p->priority;
           if (currPrio > 0) {
             p->priority--;
-            cprintf("Priority upgraded from %d -> %d [pid :%d] [name :%s]\n", currPrio , p->priority ,p->pid, p->name);
+            //cprintf("Priority upgraded from %d -> %d [pid :%d] [name :%s]\n", currPrio , p->priority ,p->pid, p->name);
             for(q = &ptable.queues[currPrio][0]; q < &ptable.queues[currPrio][NPROC]; q++) {
               if (*q == p) {
                 *q = NULL;
