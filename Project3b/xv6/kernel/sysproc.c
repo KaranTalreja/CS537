@@ -88,3 +88,27 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_shm_refcount(void)
+{
+  int key;
+
+  if(argint(0, &key) < 0)
+    return -1;
+  cprintf("KEY %d\n",key);
+  return shm_refcount(key);
+}
+
+int
+sys_shmgetat(void)
+{
+  int key, numPages;
+
+  if(argint(0, &key) < 0)
+    return -1;
+  if(argint(1, &numPages) < 0)
+    return -1;
+  cprintf("KEY:PAGES %d, %d\n",key, numPages);
+  return (unsigned int)shmgetat(key, numPages);
+}

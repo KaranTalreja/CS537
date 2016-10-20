@@ -25,6 +25,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+void* shmgetat(int key, int num_pages);
+int shm_refcount(int key);
 
 // user library functions (ulib.c)
 int stat(char*, struct stat*);

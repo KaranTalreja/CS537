@@ -124,7 +124,7 @@ static struct kmap {
   void *e;
   int perm;
 } kmap[] = {
-  {(void*)USERTOP,    (void*)0x100000, PTE_W},  // I/O space
+  {(void*)USERTOP,    (void*)0x100000, PTE_W},  // I/O space TODO Change here to reflect that since USERTOP changed, This should remain same
   {(void*)0x100000,   data,            0    },  // kernel text, rodata
   {data,              (void*)PHYSTOP,  PTE_W},  // kernel data, memory
   {(void*)0xFE000000, 0,               PTE_W},  // device mappings
@@ -231,7 +231,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   char *mem;
   uint a;
 
-  if(newsz > USERTOP)
+  if(newsz > USERTOP)  // TODO Change here for making the shared pages unable to be allocated by other means
     return 0;
   if(newsz < oldsz)
     return oldsz;
@@ -286,7 +286,7 @@ freevm(pde_t *pgdir)
 
   if(pgdir == 0)
     panic("freevm: no pgdir");
-  deallocuvm(pgdir, USERTOP, 0);
+  deallocuvm(pgdir, USERTOP, 0);  // TODO Change here for not freeing the shared pages 
   for(i = 0; i < NPDENTRIES; i++){
     if(pgdir[i] & PTE_P)
       kfree((char*)PTE_ADDR(pgdir[i]));
@@ -363,4 +363,14 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
     va = va0 + PGSIZE;
   }
   return 0;
+}
+
+int shm_refcount(int key)
+{
+  return key;
+}
+
+void* shmgetat(int key, int num_pages)
+{
+  return (void*)num_pages;
 }
