@@ -231,7 +231,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   char *mem;
   uint a;
 
-  if(newsz > USERTOP)  // TODO Change here for making the shared pages unable to be allocated by other means
+  if(newsz > SHAREDSTART)  // TODO Change here for making the shared pages unable to be allocated by other means
     return 0;
   if(newsz < oldsz)
     return oldsz;
@@ -286,7 +286,7 @@ freevm(pde_t *pgdir)
 
   if(pgdir == 0)
     panic("freevm: no pgdir");
-  deallocuvm(pgdir, USERTOP, 0);  // TODO Change here for not freeing the shared pages 
+  deallocuvm(pgdir, SHAREDSTART, 0);  // TODO Change here for not freeing the shared pages 
   for(i = 0; i < NPDENTRIES; i++){
     if(pgdir[i] & PTE_P)
       kfree((char*)PTE_ADDR(pgdir[i]));
@@ -365,12 +365,70 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
   return 0;
 }
 
+void* shmem_addr[MAX_KEYS][MAX_PAGES];
+int shmem_count[MAX_KEYS];
+int shmem_pages[MAX_KEYS];
+
+void shmeminit(void)
+{
+  cprintf("shmeminit\n");
+  int i;
+  for (i = 0; i < MAX_KEYS; i++)
+  {
+    shmem_count[i] = 0;
+    shmem_pages[i] = 0;
+  }
+  return;
+}
+
 int shm_refcount(int key)
 {
-  return key;
+  if (key < 0 || key > 7) return -1;
+  return shmem_count[key];
 }
 
 void* shmgetat(int key, int num_pages)
 {
-  return (void*)num_pages;
+  if (key < 0 || key > 7) return (void*)-1;
+  if (num_pages < 0 || num_pages > 4) return (void*)-1;
+  if ((proc->current_shared_pages_top - num_pages*PGSIZE) < SHAREDSTART) return (void*)-1;
+  void* retval = NULL;
+  if (proc->shmem_addr[key] == NULL)  // This process has no shared segment at this key
+  {
+    if (shmem_count[key] == 0)  // There is no shared segment globally for this key
+    {
+      // Create a shared segment globally for this key
+      int i;
+      for(i=0; i<num_pages; i++)
+      {
+        void* mem;
+        if ((mem = (void*)kalloc()) == 0)
+          return (void*)-1;
+        memset(mem, 0, PGSIZE);
+        proc->current_shared_pages_top -= PGSIZE;
+        if(mappages(proc->pgdir, (char*)(proc->current_shared_pages_top), PGSIZE, PADDR(mem), PTE_W|PTE_U) < 0) 
+          return (void*)-1;
+        shmem_addr[key][i] = mem;
+      }
+      shmem_count[key] = 1;
+      shmem_pages[key] = num_pages;
+    }
+    else  /* There is a shared segment globally for this key but, there is none
+      for this process. So attach the previous one to this process.*/ 
+    {
+      int i;
+      for(i=0; i<shmem_pages[key]; i++)
+      {
+        void* mem = shmem_addr[key][i];
+        proc->current_shared_pages_top -= PGSIZE;
+        if (mappages(proc->pgdir, (char*)(proc->current_shared_pages_top), PGSIZE, PADDR(mem), PTE_W|PTE_U) < 0)
+          return (void*)-1;
+      }
+      shmem_count[key]++;
+    }
+    proc->shmem_addr[key] = (void*)(proc->current_shared_pages_top);
+    retval = proc->shmem_addr[key];
+  }
+  else retval = proc->shmem_addr[key];  // If there is one for this process, return that virtual memory.
+  return retval; 
 }

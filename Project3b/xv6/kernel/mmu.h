@@ -141,6 +141,13 @@ struct segdesc {
 
 typedef uint pte_t;
 
+#define MAX_KEYS 8  // 0 to 7
+#define MAX_PAGES 4  // 0 to 3
+
+extern void* shmem_addr[MAX_KEYS][MAX_PAGES];
+extern int shmem_count[MAX_KEYS];
+extern int shmem_pages[MAX_KEYS];
+
 // Task state segment format
 struct taskstate {
   uint link;         // Old ts selector

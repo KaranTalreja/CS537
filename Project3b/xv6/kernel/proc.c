@@ -128,7 +128,7 @@ int
 fork(void)
 {
   int i, pid;
-  struct proc *np;
+  struct proc *np, *proc_bk;
 
   // Allocate process.
   if((np = allocproc()) == 0)
@@ -155,6 +155,19 @@ fork(void)
  
   pid = np->pid;
   np->state = RUNNABLE;
+  np->current_shared_pages_top = USERTOP;
+  for(i=0; i<MAX_KEYS; i++)
+    np->shmem_addr[i] = NULL;
+  for(i=0; i<MAX_KEYS; i++)
+  {
+    if (proc->shmem_addr[i] != NULL)  // The parent process has some shared memory segments
+    {
+      proc_bk = proc;
+      proc = np;
+      (void)shmgetat(i,0);
+      proc = proc_bk;
+    }
+  }
   safestrcpy(np->name, proc->name, sizeof(proc->name));
   return pid;
 }
@@ -229,6 +242,21 @@ wait(void)
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
+        int i;
+        for(i=0; i<MAX_KEYS; i++)
+        {
+          if (p->shmem_addr[i] != NULL)  // The child process has some shared memory segments
+          {
+            p->shmem_addr[i] = NULL;
+            shmem_count[i]--;
+            if (shmem_count[i] == 0)
+            {
+              int j;
+              for (j=0; j<shmem_pages[i] ;j++)
+                kfree(shmem_addr[i][j]);
+            }
+          }
+        }
         release(&ptable.lock);
         return pid;
       }
