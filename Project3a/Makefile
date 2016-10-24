@@ -10,7 +10,7 @@ all: stats_client
 
 stats_client: stats_client.c libstats.so
 	@echo "$(notdir $^) --> $(notdir $@)"
-	@$(GCC) $^ -o $@ $(FLAGS) -lstats -L.
+	@$(GCC) $^ -o $@ $(FLAGS) -lrt -lstats -L.
 
 libstats.so: stats.o
 	@echo "$(notdir $^) --> $(notdir $@)"
