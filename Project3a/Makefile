@@ -1,12 +1,16 @@
 CURR_DIR=$(PWD)
 SRC=$(CURR_DIR)
-SOURCES=$(SRC)/stats_client.c $(SRC)/stats.c
+SOURCES=$(SRC)/stats_client.c $(SRC)/stats.c $(SRC)/stats_server.c
 
 GCC=gcc
 FLAGS=-g -Wall -gdwarf-2 
 
-all: stats_client 
+all: stats_client stats_server 
 	@$(MAKE) lint
+
+stats_server: stats_server.c libstats.so
+	@echo "$(notdir $^) --> $(notdir $@)"
+	@$(GCC) $^ -o $@ $(FLAGS) -lstats -L.
 
 stats_client: stats_client.c libstats.so
 	@echo "$(notdir $^) --> $(notdir $@)"
@@ -27,6 +31,6 @@ lint:
 	@rm $(SRC)/CPPLINT.cfg
 
 clean:
-	@rm -rf stats_client stats.o libstats.so $(SRC)/CPPLINT.cfg
+	@rm -rf stats_client stats_server stats.o libstats.so $(SRC)/CPPLINT.cfg
 
 .PHONY:test

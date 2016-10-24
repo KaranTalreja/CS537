@@ -45,7 +45,7 @@ main(int argc, char* argv[]) {
         usage();
     }
   }
-  stat_init(key);
+  stats_t* statistics = stats_init(key);
   int pid = getpid();
   int rc = setpriority(PRIO_PROCESS, pid, priority);
   if (rc < 0) {
@@ -75,9 +75,12 @@ main(int argc, char* argv[]) {
     count++;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now);
     float elapsed = timeSpecToFloat(&now) - timeSpecToFloat(&absStart);
-    fprintf(stdout, "%d %d %s %.2f %d\n",
-    count, pid, argv[0], elapsed, priority);
-    fflush(stdout);
+    statistics->pid = pid;
+    statistics->counter = count;
+    statistics->priority = priority;
+    statistics->cpu_secs = elapsed;
+    strncpy(statistics->argv, argv[0], 15);
   }
+  // TODO(pradeep) call stats_unlink after signal handler is installed
   return 0;
 }
