@@ -86,6 +86,21 @@ exec(char *path, char **argv)
   proc->sz = sz;
   proc->tf->eip = elf.entry;  // main
   proc->tf->esp = sp;
+  proc->current_shared_pages_top = USERTOP;
+  for(i=0; i<MAX_KEYS; i++)
+  {
+    if (proc->shmem_addr[i] != NULL)  // The child process has some shared memory segments
+    {
+      proc->shmem_addr[i] = NULL;
+      shmem_count[i]--;
+      if (shmem_count[i] == 0)
+      {
+        int j;
+        for (j=0; j<shmem_pages[i] ;j++)
+          kfree(shmem_addr[i][j]);
+      }
+    }
+  }
   switchuvm(proc);
   freevm(oldpgdir);
 

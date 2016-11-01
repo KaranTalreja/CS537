@@ -231,7 +231,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   char *mem;
   uint a;
 
-  if(newsz > SHAREDSTART)  // TODO Change here for making the shared pages unable to be allocated by other means
+  if(newsz > proc->current_shared_pages_top)
     return 0;
   if(newsz < oldsz)
     return oldsz;
@@ -286,7 +286,7 @@ freevm(pde_t *pgdir)
 
   if(pgdir == 0)
     panic("freevm: no pgdir");
-  deallocuvm(pgdir, SHAREDSTART, 0);  // TODO Change here for not freeing the shared pages 
+  deallocuvm(pgdir, proc->current_shared_pages_top, 0);  // TODO Change here for not freeing the shared pages 
   for(i = 0; i < NPDENTRIES; i++){
     if(pgdir[i] & PTE_P)
       kfree((char*)PTE_ADDR(pgdir[i]));
@@ -377,6 +377,11 @@ void shmeminit(void)
   {
     shmem_count[i] = 0;
     shmem_pages[i] = 0;
+    int j;
+    for (j = 0; j< MAX_PAGES; j++)
+    {
+      shmem_addr[i][j] = NULL; 
+    }
   }
   return;
 }
@@ -389,11 +394,12 @@ int shm_refcount(int key)
 
 void* shmgetat(int key, int num_pages)
 {
+  struct proc* p = proc;
   if (key < 0 || key > 7) return (void*)-1;
-  if (num_pages < 0 || num_pages > 4) return (void*)-1;
-  if ((proc->current_shared_pages_top - num_pages*PGSIZE) < SHAREDSTART) return (void*)-1;
+  if (num_pages <= 0 || num_pages > 4) return (void*)-1;
+  if ((proc->current_shared_pages_top - num_pages*PGSIZE) < proc->sz) return (void*)-1; // TODO change this, make it dynamic
   void* retval = NULL;
-  if (proc->shmem_addr[key] == NULL)  // This process has no shared segment at this key
+  if (p->shmem_addr[key] == NULL)  // This process has no shared segment at this key
   {
     if (shmem_count[key] == 0)  // There is no shared segment globally for this key
     {

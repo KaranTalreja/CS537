@@ -98,6 +98,7 @@ userinit(void)
   p->cwd = namei("/");
 
   p->state = RUNNABLE;
+  p->current_shared_pages_top = USERTOP;
   release(&ptable.lock);
 }
 
@@ -164,7 +165,7 @@ fork(void)
     {
       proc_bk = proc;
       proc = np;
-      (void)shmgetat(i,0);
+      (void)shmgetat(i,1);
       proc = proc_bk;
     }
   }
@@ -220,7 +221,7 @@ exit(void)
 int
 wait(void)
 {
-  struct proc *p;
+  struct proc *p, *proc_bk;
   int havekids, pid;
 
   acquire(&ptable.lock);
@@ -236,7 +237,10 @@ wait(void)
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
+        proc_bk = proc;
+        proc = p;
         freevm(p->pgdir);
+        proc = proc_bk;
         p->state = UNUSED;
         p->pid = 0;
         p->parent = 0;
