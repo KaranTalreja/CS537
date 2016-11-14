@@ -23,7 +23,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
+#include "request.h"
 
 /* Default file permissions are DEF_MODE & ~DEF_UMASK */
 /* $begin createmasks */
@@ -120,5 +120,19 @@ int open_listenfd(int portno);
 /* Wrappers for client/server helper functions */
 int Open_clientfd(char *hostname, int port);
 int Open_listenfd(int port); 
+
+void init();
+void add_to_buffer(int);
+void* read_from_buffer(void*);
+typedef struct buffer_node {
+  int in_use;
+  int connfd;
+} buffer_node_t;
+extern pthread_mutex_t lock;
+extern pthread_cond_t read_cond;
+extern pthread_cond_t write_cond;
+extern buffer_node_t* buffer;
+extern int num_buffers; 
+extern pthread_t* threads;
 
 #endif /* __CSAPP_H__ */

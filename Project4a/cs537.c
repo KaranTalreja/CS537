@@ -557,4 +557,36 @@ int Open_listenfd(int port)
     return rc;
 }
 
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;;
+pthread_cond_t read_cond = PTHREAD_COND_INITIALIZER;
+pthread_cond_t write_cond = PTHREAD_COND_INITIALIZER;
+buffer_node_t* buffer;
+int num_buffers;
+pthread_t* threads;
+
+void init()
+{
+  pthread_mutex_init(&lock, NULL);
+  pthread_cond_init(&read_cond, NULL);
+  pthread_cond_init(&write_cond, NULL);
+  buffer = (buffer_node_t*)malloc(num_buffers*sizeof(buffer_node_t));
+  memset(buffer, 0, num_buffers*sizeof(buffer_node_t));
+}
+
+void add_to_buffer (int connfd)
+{
+  pthread_mutex_lock(&lock);
+  int i = 0;
+  for (i =0; i < num_buffers; i++) {
+    if (0 == buffer[i].in_use) {
+      buffer[i].in_use = 1;
+      buffer[i].connfd = connfd;
+      pthread_cond_signal(&read_cond);
+      break;
+    }
+  }
+  pthread_mutex_unlock(&lock);
+  printf("Added request %d\n", connfd);
+  fflush(stdout);
+}
 
