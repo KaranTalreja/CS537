@@ -35,8 +35,8 @@ void* read_from_buffer (void* arg)
       for (i = 0; i < num_buffers; i++) {
         if (1 == buffer[i].in_use) {
           buffer[i].in_use = 2;
-          printf ("Servicing %d\n", buffer[i].connfd);
-          fflush(stdout);
+//          printf ("Servicing %d\n", buffer[i].connfd);
+//          fflush(stdout);
           connfd = &buffer[i];
           serviced = 1;
           break;
@@ -50,6 +50,7 @@ void* read_from_buffer (void* arg)
     connfd->in_use = 0;
     connfd->connfd = 0;
     connfd = NULL;
+    pthread_cond_signal(&write_cond);
   }
 }
 
@@ -73,8 +74,8 @@ int main(int argc, char *argv[])
     while (1) {
 	clientlen = sizeof(clientaddr);
 	connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *) &clientlen);
-  printf("Adding %d\n", connfd);
-  fflush(stdout);
+//  printf("Adding %d\n", connfd);
+//  fflush(stdout);
   add_to_buffer(connfd);
     }
 } 

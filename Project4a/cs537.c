@@ -577,16 +577,21 @@ void add_to_buffer (int connfd)
 {
   pthread_mutex_lock(&lock);
   int i = 0;
-  for (i =0; i < num_buffers; i++) {
-    if (0 == buffer[i].in_use) {
-      buffer[i].in_use = 1;
-      buffer[i].connfd = connfd;
-      pthread_cond_signal(&read_cond);
-      break;
+  int added = 0;
+  while (0 == added) {
+    for (i =0; i < num_buffers; i++) {
+      if (0 == buffer[i].in_use) {
+        buffer[i].in_use = 1;
+        buffer[i].connfd = connfd;
+        pthread_cond_signal(&read_cond);
+        added = 1;
+        break;
+      }
     }
+    if (0 == added) pthread_cond_wait(&write_cond, &lock);
   }
   pthread_mutex_unlock(&lock);
-  printf("Added request %d\n", connfd);
-  fflush(stdout);
+//  printf("Added request %d\n", connfd);
+//  fflush(stdout);
 }
 
