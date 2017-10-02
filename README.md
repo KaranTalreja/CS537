@@ -93,7 +93,7 @@ W @ 04:35pm-05:25pm in 1325 CS<br>
 <li> Slides for all past lectures (through GFS) are posted.
 <li> <a href=Projects/P5/p5.html>P5 is available.</a>
 <li> <a href=Exams/f16-e2.pdf>Exam 2</a> and <a href=Exams/f16-e2-answers.pdf>solutions</a>.
-<li> The exam 2 review slides from <a href=Slides/exam2-review.pdf>lecture</a>
+<li> The exam 2 review slides from <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/exam2-review.pdf>lecture</a>
 <li> <a href=Projects/P4/p4.html>P4 is available.</a>
 <li> No lecture on Thursday, November 3.  Enjoy!
 <li> The deadline for <a href=Projects/P3/p3.html>Project 3</a> has been extended to Friday 11/04 at 9:00 pm.
@@ -103,7 +103,7 @@ W @ 04:35pm-05:25pm in 1325 CS<br>
 <li> <a href=Projects/P3/p3.html>Project 3</a> is available and due on Wednesday 11/02 at 9:00 pm.
 <li> Exam 1 <a href=Exams/f16-e1-v1.pdf>questions-only (v1)</a> and <a href=Exams/f16-e1-v2-solutions.pdf>questions-and-answers (v2)</a> (both versions are given so you can remap questions to match the version you took).
 <li> The deadline for Project 2 has been extended to Sunday evening (midnight), 10/16.
-<li> The review slides from <a href=Slides/exam1-review.pdf>lecture</a>
+<li> The review slides from <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/exam1-review.pdf>lecture</a>
 <li> A bunch of
 <a href=http://pages.cs.wisc.edu/~remzi/Classes/537/Fall2013/OldExams>old
 exams</a> from CS 537, but in a different format.
@@ -154,7 +154,7 @@ exams</a> from CS 537, but in a different format.
 	  &nbsp;
 	  <a href=http://www.cs.wisc.edu/~remzi/OSTEP/intro.pdf><font color=black>
 		  2</a>
-	  <a href=Slides/lecture1-Intro.pdf><font color=black>Slides</a> </sup>
+	  <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture1-Intro.pdf><font color=black>Slides</a> </sup>
 </td>
 
 <td bgcolor=#f88017><b>09/07</b> Intro to C </td> 
@@ -167,7 +167,7 @@ exams</a> from CS 537, but in a different format.
 	  <a href=http://www.cs.wisc.edu/~remzi/OSTEP/cpu-api.pdf><font color=black>5</a> 
 	  &nbsp; 
 	  <a href=http://www.cs.wisc.edu/~remzi/OSTEP/cpu-mechanisms.pdf><font color=black>6</a> 
-<a href=Slides/lecture2-processes.pdf><font color=black>Slides</a> </sup></td> 
+<a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture2-processes.pdf><font color=black>Slides</a> </sup></td> 
 
 <td bgcolor=#f88017><b>09/09</b> </td> 
 </tr>
@@ -183,7 +183,7 @@ exams</a> from CS 537, but in a different format.
 		  <a href=http://www.cs.wisc.edu/~remzi/OSTEP/cpu-sched-mlfq.pdf><font color=black>8</a>
 		  &nbsp;
 		  <a href=http://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched-lottery.pdf><font color=black>9</a>
-<a href=Slides/lecture3-Scheduling.pdf><font color=black>Slides</a>
+<a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture3-Scheduling.pdf><font color=black>Slides</a>
 		  &nbsp;</sup>  
 </td> 
 
@@ -202,7 +202,7 @@ exams</a> from CS 537, but in a different format.
   &nbsp; 
   <a href=http://www.cs.wisc.edu/~remzi/OSTEP/vm-segmentation.pdf><font color=black>16</a>
   &nbsp; 
-<a href=Slides/lecture4-VirtualMem.pdf><font color=black>Slides</a>
+<a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture4-VirtualMem.pdf><font color=black>Slides</a>
 </sup> </td>
 
 <td bgcolor=#f88017><b>09/16</b>
@@ -216,14 +216,14 @@ exams</a> from CS 537, but in a different format.
 	  &nbsp; 
 	  <a href=http://www.cs.wisc.edu/~remzi/OSTEP/vm-paging.pdf><font color=black>18</a> 
   &nbsp; 
-<a href=Slides/lecture5-Paging.pdf><font color=black>Slides</a>
+<a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture5-Paging.pdf><font color=black>Slides</a>
 </sup> 
 </td> 
 <td bgcolor=#f88017><b>09/21</b> P1b - Syscall </td> 
 <td bgcolor=#f88017><b>09/22</b> <font color=black>Paging:
 	TLBs <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/vm-tlbs.pdf><font color=black>19</a> </sup> 
 <sup>
-<a href=Slides/lecture6-TLB.pdf><font color=black>Slides</a> </sup>
+<a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture6-TLB.pdf><font color=black>Slides</a> </sup>
 
  
 </td> 
@@ -235,7 +235,7 @@ exams</a> from CS 537, but in a different format.
 <tr>
 <td bgcolor=#f88017><b>09/26</b> <a href=Projects/P2/p2.html><font color=black>P2 </a> </td> 
 <td bgcolor=#f88017><b>09/27</b> <font color=black>Paging:
-	Smaller <sup><a href=Slides/lecture7-SmallerTables.pdf><font color=black>Slides</a> </sup> 
+	Smaller <sup><a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture7-SmallerTables.pdf><font color=black>Slides</a> </sup> 
 <sup>
 <a href=http://www.cs.wisc.edu/~remzi/OSTEP/vm-smalltables.pdf><font color=black>20 </a> 
 </td> 
@@ -245,7 +245,7 @@ exams</a> from CS 537, but in a different format.
 	Physical <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys.pdf><font color=black>21 </a>
 	  &nbsp;
 	  <a href=http://www.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys-policy.pdf><font color=black>22</a> 
-<a href=Slides/lecture8-MemPolicy.pdf><font color=black>Slides</a> </sup>
+<a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture8-MemPolicy.pdf><font color=black>Slides</a> </sup>
 </sup> </td> 
 
 <td bgcolor=#f88017><b>09/30</b> </td> 
@@ -253,7 +253,7 @@ exams</a> from CS 537, but in a different format.
 
 <tr>
 <td bgcolor=#f88017><b>10/03</b> </td> 
-<td bgcolor=#f88017><b>10/04</b> <font color=black><a href=Slides/exam1-review.pdf><font color=black>Midterm #1 Review</a></td> 
+<td bgcolor=#f88017><b>10/04</b> <font color=black><a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/exam1-review.pdf><font color=black>Midterm #1 Review</a></td> 
 <td bgcolor=#f88017><b>10/05</b> MIDTERM </td> 
 <td bgcolor=#3EA99F><b>10/06</b> <font color=black>Threads <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/dialogue-concurrency.pdf><font color=black>d</a>
 	  &nbsp;
@@ -261,7 +261,7 @@ exams</a> from CS 537, but in a different format.
 	<sup>
 	  <a href=http://pages.cs.wisc.edu/~remzi/OSTEP/threads-api.pdf>27</a> </sup>  
 	<sup>
-	  <a href=Slides/lecture9-Threads.pdf><font color=black>Slides</a></sup> </td>
+	  <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture9-Threads.pdf><font color=black>Slides</a></sup> </td>
 <td bgcolor=#3EA99F><b>10/07</b> </td> 
 </tr> 
 
@@ -271,13 +271,13 @@ exams</a> from CS 537, but in a different format.
 <td bgcolor=#3EA99F><b>10/11</b> 
 
 <font color=black>Locks <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf><font color=black>28 </a> </sup> 
-<sup>	  <a href=Slides/lecture10-Locks.pdf><font color=black>Slides</a> </sup></td>
+<sup>	  <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture10-Locks.pdf><font color=black>Slides</a> </sup></td>
 
 <td bgcolor=#3EA99F><b>10/12</b> P2b </td> 
 
 <td bgcolor=#3EA99F><b>10/13</b> <font color=black>Locks,
 	CVs <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/threads-locks-usage.pdf><font color=black>29 </a> </sup>  <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/threads-cv.pdf><font color=black>30 </a> </sup> 
-<sup>	  <a href=Slides/lecture11-QLocks+CV.pdf><font color=black>Slides</a> </sup></td>
+<sup>	  <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture11-QLocks+CV.pdf><font color=black>Slides</a> </sup></td>
 <td bgcolor=#3EA99F><b>10/14</b> <a href=Projects/P2/p2.html><font color=black>P2:Due </a> </td> 
 </tr> 
 
@@ -285,17 +285,17 @@ exams</a> from CS 537, but in a different format.
 <td bgcolor=#3EA99F><b>10/17</b> <a href=Projects/P3/p3.html><font color=black>P3 Avail</a> </td> 
 <td bgcolor=#3EA99F><b>10/18</b> 
 <font color=black>Semaphores 1<sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/threads-sema.pdf><font color=black>31 </a> </sup> <sup>
-	<a href=Slides/lecture12-Semaphores.pdf><font color=black>Slides</a> </sup></td></td> 
+	<a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture12-Semaphores.pdf><font color=black>Slides</a> </sup></td></td> 
 <td bgcolor=#3EA99F><b>10/19</b> P3 </td> 
 <td bgcolor=#3EA99F><b>10/20</b> 
 <font color=black>Semaphores 2<sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/threads-sema.pdf><font color=black>31 </a> </sup> <sup>
-	<a href=Slides/lecture13-Semaphores-2.pdf><font color=black>Slides</a> </sup></td></td> 
+	<a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture13-Semaphores-2.pdf><font color=black>Slides</a> </sup></td></td> 
 <td bgcolor=#3EA99F><b>10/21</b> </td> 
 </tr> 
 
 <tr>
 <td bgcolor=#3EA99F><b>10/24</b> <font color=black></td> 
-<td bgcolor=#3ea99f><b>10/25</b> <font color=black><font color=black>Bugs <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/threads-bugs.pdf><font color=black>32 </a> </sup> <sup>	  <a href=Slides/lecture14-Deadlock.pdf><font color=black>Slides</a> </sup></td> 
+<td bgcolor=#3ea99f><b>10/25</b> <font color=black><font color=black>Bugs <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/threads-bugs.pdf><font color=black>32 </a> </sup> <sup>	  <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture14-Deadlock.pdf><font color=black>Slides</a> </sup></td> 
 
 <td bgcolor=#4CC417><b>10/26</b> P3 </td> 
 <td bgcolor=#4CC417><b>10/27</b> 
@@ -305,7 +305,7 @@ I/O and
 	  <a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-devices.pdf><font color=black>36 </a>
 	  &nbsp;
 	  <a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-disks.pdf><font color=black>37 </a> 
-	  <a href=Slides/lecture15-IOdevices.pdf><font color=black>Slides</a> 
+	  <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture15-IOdevices.pdf><font color=black>Slides</a> 
 </sup> </td> 
 <td bgcolor=#4CC417><b>10/28</b> </td> 
 </tr> 
@@ -314,7 +314,7 @@ I/O and
 <td bgcolor=#4CC417><b>10/31</b> </td> 
 <td bgcolor=#4CC417><b>11/01</b> <font color=black>RAID <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-raid.pdf><font color=black>38</a>
  </a> 
-	  <a href=Slides/lecture16-RAID.pdf><font color=black>Slides</a> 
+	  <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture16-RAID.pdf><font color=black>Slides</a> 
 </sup> </td> 
 
 <td bgcolor=#4CC417><b>11/02</b> <a href=Projects/P3/p3.html><font color=black>P3:Due </a> </td> 
@@ -325,10 +325,10 @@ I/O and
 <tr>
 <td bgcolor=#4CC417><b>11/07</b> </td> 
 <td bgcolor=#4CC417><b>11/08</b>
-<a href=Slides/exam2-review.pdf><font color=black>Review</a> </td> 
+<a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/exam2-review.pdf><font color=black>Review</a> </td> 
 <td bgcolor=#4CC417><b>11/09</b>Midterm 2</td> 
 <td bgcolor=#4CC417><b>11/10</b> 
-<font color=black>File Systems <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-intro.pdf><font color=black>39 </a> 	  <a href=Slides/lecture17-FileSystem.pdf><font color=black>Slides</a> </sup> </td> 
+<font color=black>File Systems <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-intro.pdf><font color=black>39 </a> 	  <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture17-FileSystem.pdf><font color=black>Slides</a> </sup> </td> 
 
 <td bgcolor=#4CC417><b>11/11</b> </td> 
 </tr> 
@@ -336,9 +336,9 @@ I/O and
 <tr>
 <td bgcolor=#4CC417><b>11/14</b> </td> 
 <td bgcolor=#4CC417><b>11/15</b>
-<font color=black>FS Impl <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-implementation.pdf><font color=black>40</a> 	  <a href=Slides/lecture18-FSImp.pdf><font color=black>Slides</a> </sup> </td> 
+<font color=black>FS Impl <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-implementation.pdf><font color=black>40</a> 	  <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture18-FSImp.pdf><font color=black>Slides</a> </sup> </td> 
 <td bgcolor=#4CC417><b>11/16</b> P4 </td> 
-<td bgcolor=#4CC417><b>11/17</b> <font color=black>FFS <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-ffs.pdf><font color=black>41 </a> <a href=Slides/lecture19-FFS.pdf><font color=black>Slides</a> </sup> </td> 
+<td bgcolor=#4CC417><b>11/17</b> <font color=black>FFS <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-ffs.pdf><font color=black>41 </a> <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture19-FFS.pdf><font color=black>Slides</a> </sup> </td> 
 <td bgcolor=#4CC417><b>11/18</b> <a href=Projects/P4/p4.html><font color=black>P4 Due</a></td> 
 </tr> 
 
@@ -352,16 +352,16 @@ I/O and
 
 <tr>
 <td bgcolor=#4CC417><b>11/28</b> </td> 
-<td bgcolor=#4CC417><b>11/29</b> <font color=black>Journaling <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-journaling.pdf><font color=black>42 </a> <a href=Slides/lecture20-Journal.pdf><font color=black>Slides</a> </sup> </td> 
+<td bgcolor=#4CC417><b>11/29</b> <font color=black>Journaling <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-journaling.pdf><font color=black>42 </a> <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture20-Journal.pdf><font color=black>Slides</a> </sup> </td> 
 <td bgcolor=#4CC417><b>11/30</b> P5 </td>
-<td bgcolor=#4CC417><b>12/01</b> <font color=black>LFS <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-lfs.pdf><font color=black>43 </a> <a href=Slides/lecture21-LFS.pdf><font color=black>Slides</a> </sup> </td> 
+<td bgcolor=#4CC417><b>12/01</b> <font color=black>LFS <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/file-lfs.pdf><font color=black>43 </a> <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture21-LFS.pdf><font color=black>Slides</a> </sup> </td> 
 <td bgcolor=#4CC417><b>12/02</b>
 </td> 
 </tr> 
 
 <tr>
 <td bgcolor=#E9AB17><b>12/05</b> </td> 
-<td bgcolor=#E9AB17><b>12/06</b> <font color=black>DistSys+NFS <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/dialogue-distribution.pdf><font color=black>d </a> &nbsp; <a href=http://www.cs.wisc.edu/~remzi/OSTEP/dist-intro.pdf><font color=black>47 </a> </sup> <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/dist-nfs.pdf><font color=black>48 </a> <a href=Slides/lecture22-dist.pdf><font color=black>Slides</a> </sup> </td> 
+<td bgcolor=#E9AB17><b>12/06</b> <font color=black>DistSys+NFS <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/dialogue-distribution.pdf><font color=black>d </a> &nbsp; <a href=http://www.cs.wisc.edu/~remzi/OSTEP/dist-intro.pdf><font color=black>47 </a> </sup> <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/dist-nfs.pdf><font color=black>48 </a> <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture22-dist.pdf><font color=black>Slides</a> </sup> </td> 
 <td bgcolor=#E9AB17><b>12/07</b> P5 </td> 
 <td bgcolor=#E9AB17><b>12/08</b> <font color=black>NFS+AFS <sup><a href=http://www.cs.wisc.edu/~remzi/OSTEP/dist-afs.pdf><font color=black>49 </a> </sup> </td> 
 <td bgcolor=#E9AB17><b>12/09</b>
@@ -372,9 +372,9 @@ I/O and
 <tr>
 <td bgcolor=#E9AB17><b>12/12</b> </td> 
 <td bgcolor=#E9AB17><b>12/13</b> <a href=http://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf
-><font color=black>GFS</a> <a href=Slides/lecture24-gfs.pdf><font color=black>Slides</a> </td> 
+><font color=black>GFS</a> <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/lecture24-gfs.pdf><font color=black>Slides</a> </td> 
 <td bgcolor=#E9AB17><b>12/14</b> <b> Final Review </b> <a href=Projects/p5.html><font color=black>P5:Due </a> </td> 
-<td bgcolor=#E9AB17><b>12/15</b> <b> <a href=Slides/exam3-review.pdf>Final Review</a></b> </td> 
+<td bgcolor=#E9AB17><b>12/15</b> <b> <a href=http://pages.cs.wisc.edu/~dusseau/Classes/CS537/Fall2016/Slides/exam3-review.pdf>Final Review</a></b> </td> 
 <td bgcolor=#E9AB17><b>Saturday</b> <b> 12/17 Final at 10:05am in INGRAHAM B10</b> </td> 
 
 </tr> 
